@@ -6,8 +6,8 @@ from tqdm import tqdm
 # ==========================================
 # 1. SETUP & CONFIGURATION
 # ==========================================
-USERNAME = 'hap014@ucsd.edu' 
-PASSWORD = 'ILoveBoba1217!'
+USERNAME = '' 
+PASSWORD = ''
 VENUE_ID = 'ICLR.cc/2025/Conference'
 OUTPUT_CSV = 'iclr_2025_detailed_reviews.csv'
 
@@ -137,4 +137,5 @@ def scrape_iclr_data():
         print(f"\nSuccess! File saved as {OUTPUT_CSV}")
 
 if __name__ == "__main__":
+
     scrape_iclr_data()
