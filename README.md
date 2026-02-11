@@ -4,7 +4,7 @@ This project pulls ICLR conference review data from the OpenReview API and expor
 
 ---
 
-## Output: `iclr_2025_detailed_reviews.csv` (from `OpenReviewDataExtract.py`)
+## Output
 
 One **row per official review**. Each row includes paper-level metadata (repeated for every review of that paper) and review-specific fields.
 
@@ -52,3 +52,4 @@ One **row per official review**. Each row includes paper-level metadata (repeate
 - **OpenReview decision / meta-review replies:** `official_label`, `meta_review`.
 
 If a field is missing in the OpenReview form for a given venue or year, the corresponding column will be empty in the CSV.
+
