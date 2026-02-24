@@ -17,7 +17,9 @@ __pycache__/
 # ==========================================================
 # Data (DO NOT COMMIT RAW OR PROCESSED DATA)
 # ==========================================================
-data/
+data/*
+!data/predictions/
+!data/predictions/*.csv
 
 # If you ever want to allow small example files later:
 # !data/sample/
