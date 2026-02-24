@@ -1,0 +1,38 @@
+model_name: "google/flan-t5-base"
+train_path: "data/processed/train.jsonl"
+val_path: "data/processed/val.jsonl"
+output_dir: "runs/flan_t5_run1"
+
+seed: 42
+
+# Longer context helps a lot for multi-review inputs.
+# Start at 768; if you get MPS OOM, drop to 512.
+max_input_length: 768
+max_target_length: 384
+
+# Real training
+num_train_epochs: 1.0
+learning_rate: 0.0002
+weight_decay: 0.0
+warmup_ratio: 0.03
+
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 16   # effective batch = 16 (good on Mac)
+
+logging_steps: 10
+eval_steps: 200
+save_steps: 200
+save_total_limit: 2
+
+predict_with_generate: true
+generation_num_beams: 4
+generation_max_new_tokens: 256   # in code this becomes generation_max_length
+
+use_lora: true
+lora_r: 8
+lora_alpha: 16
+lora_dropout: 0.05
+
+fp16: false
+bf16: false
