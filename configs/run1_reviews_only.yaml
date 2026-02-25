@@ -13,7 +13,7 @@ per_device_eval_batch_size: 1
 gradient_accumulation_steps: 8
 
 learning_rate: 0.0002
-warmup_ratio: 0.03
+warmup_steps: 100
 weight_decay: 0.0
 
 logging_steps: 10

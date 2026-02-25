@@ -70,7 +70,7 @@ class Config:
     num_train_epochs: float = 1.0
     learning_rate: float = 2e-4
     weight_decay: float = 0.0
-    warmup_ratio: float = 0.03
+    warmup_steps: int = 100
 
     per_device_train_batch_size: int = 1
     per_device_eval_batch_size: int = 1
@@ -149,15 +149,21 @@ def main():
 
     # LoRA (recommended for Mac)
     if cfg.use_lora:
+        if "bart" in cfg.model_name.lower():
+            target_modules = ["q_proj", "v_proj"]
+        else:
+            target_modules = ["q", "v"]
+
         lora_config = LoraConfig(
             task_type=TaskType.SEQ_2_SEQ_LM,
             r=cfg.lora_r,
             lora_alpha=cfg.lora_alpha,
             lora_dropout=cfg.lora_dropout,
             bias="none",
+            target_modules=target_modules,
         )
         model = get_peft_model(model, lora_config)
-        print("✅ LoRA enabled. Trainable params:")
+        print(f"✅ LoRA enabled (targets: {target_modules}). Trainable params:")
         model.print_trainable_parameters()
 
     # Tokenization
@@ -204,7 +210,7 @@ def main():
         seed=cfg.seed,
         num_train_epochs=cfg.num_train_epochs,
         learning_rate=cfg.learning_rate,
-        warmup_ratio=cfg.warmup_ratio,
+        warmup_steps=cfg.warmup_steps,
         weight_decay=cfg.weight_decay,
 
         per_device_train_batch_size=cfg.per_device_train_batch_size,
@@ -221,7 +227,7 @@ def main():
         report_to="none",
 
         predict_with_generate=cfg.predict_with_generate,
-        generation_max_length=cfg.max_input_length + cfg.generation_max_new_tokens,
+        generation_max_length=cfg.generation_max_new_tokens,
         generation_num_beams=cfg.generation_num_beams,
 
         # On Apple Silicon, keep fp16/bf16 off
