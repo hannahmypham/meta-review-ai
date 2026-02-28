@@ -1,0 +1,58 @@
+High Level
+
+    A[OpenReview API] --> B[Data Processing]
+    B --> C[Dataset<br>train / val / test]
+
+    C --> D[Model Training<br>FLAN-T5 / BART / Pegasus]
+    D --> E[Trained Model]
+
+    E --> F[Inference<br>Generate decision + meta-review]
+    C --> F
+
+    F --> G[Predictions]
+
+    G --> H[Evaluation<br>Classification + Text metrics]
+
+    H --> I[Model Comparison<br>Select Best Model]
+
+Low Level flowchart TB
+    subgraph Data["Data Pipeline"]
+        A[OpenReview API] -->|OpenReviewDataExtract.py| B[(Raw CSV<br>~8.6K papers, ~30K reviews)]
+        B -->|build_dataset.py| C1[Group reviews by paper_id]
+        C1 --> C2[Build structured prompts<br>title + abstract + aggregates + reviews]
+        C2 --> C3[Build targets<br>DECISION + META_REVIEW]
+        C3 --> C4[Stratified split 80/10/10]
+        C4 --> D[(train.jsonl / val.jsonl / test.jsonl)]
+    end
+
+    subgraph Train["Training (train_flan_t5.py)"]
+        E[Load YAML config] --> F[Load pretrained model<br>FLAN-T5 / BART / Pegasus]
+        E --> T0[Load tokenizer]
+        T0 --> J[Tokenize dataset ds.map<br>input_ids + labels]
+        F --> G{LoRA enabled?}
+        G -- Yes --> H[Apply LoRA adapter<br>BART/Pegasus: q_proj, v_proj<br>T5: q, v]
+        G -- No --> I[Use full model]
+        H --> K[Seq2SeqTrainer<br>TrainingArgs: eval/save steps,<br>grad accumulation, predict_with_generate]
+        I --> K
+        J --> K
+        K --> L[(Saved run folder<br>runs/run_name/<br>weights + tokenizer + config)]
+    end
+
+    subgraph Predict["Inference (generate_predictions.py)"]
+        L --> M[Load trained model + tokenizer]
+        D --> N[Read test.jsonl]
+        N --> O[Generate predictions<br>num_beams=4, max_new_tokens=256]
+        M --> O
+        O --> P[Extract decision + meta-review]
+        P --> Q[(predictions.csv<br>paper_id / true / pred)]
+    end
+
+    subgraph Eval["Evaluation"]
+        Q --> R[Decision metrics<br>Accuracy / F1 / Precision / Recall]
+        Q --> S[Text metrics<br>ROUGE-1 / ROUGE-2 / ROUGE-L / BERTScore]
+        R --> EVAL_OUT[(eval_metrics.json)]
+        S --> EVAL_OUT
+        EVAL_OUT --> U[Compare models<br>select best]
+    end
+
+    D --> Train
